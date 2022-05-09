@@ -3,9 +3,14 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const historyCleanerService = require('./components/storage/historyCleanerService');
 
 const messagesRouter = require('./routes/messages');
 const registrationRouter = require('./routes/registration');
+
+historyCleanerService().then(() => {
+  console.log('check history to delete');
+});
 
 const app = express();
 

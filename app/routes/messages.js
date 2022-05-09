@@ -32,7 +32,7 @@ const saveMessage = (data) => {
         prepareMessageToSave(data.message),
     );
 
-    MessageStorageService.saveDataToFile(messageRequest);
+    MessageStorageService.saveData(messageRequest);
 };
 
 
@@ -45,7 +45,7 @@ router.post(
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({success: false, errors: errors.array()});
         }
 
         try {
@@ -82,6 +82,28 @@ router.get(
                 data: MessageStorageService.getMessagesByUserId(userId, MessageListTypes.TARGET_TO_USER)
             }
         );
+    }
+)
+
+router.post(
+    '/message/mark-as-read',
+    body('user_id').not().isEmpty().isString(),
+    body('messages').not().isEmpty().isArray(),
+    (req, res) => {
+        try {
+            const errors = validationResult(req);
+            let userId = req.body.user_id;
+            let messages = req.body.messages;
+
+            if (!errors.isEmpty()) {
+                return res.status(400).json({success: false, errors: errors.array()});
+            }
+
+            MessageStorageService.markMessagesAsRead(userId, messages);
+            return res.json({success: true});
+        } catch (e) {
+            return res.status(500).json({success: false, errors: e.toString()});
+        }
     }
 )
 

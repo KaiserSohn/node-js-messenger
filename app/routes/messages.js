@@ -54,7 +54,7 @@ router.post(
             saveMessage(req.body);
             return res.json({success: true});
         } catch (e) {
-            return res.status(500).json({errors: e})
+            return res.status(500).json({errors: e.toString()})
         }
     }
 );

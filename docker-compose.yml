@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  nginx:
+    ports:
+      - "80:80"
+    build:
+      context: ./docker/nginx
+    container_name: 'node_messenger_nginx'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./docker/node
+    container_name: 'node_messenger_backend'
+    volumes:
+      - ./app:/app
+    restart: unless-stopped

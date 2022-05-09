@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const MessageStorageService = require('../components/storage/messageStorageService');
 const MessageListTypes = require('../components/storage/messageListTypes');
 const MessageRequest = require('../dto/messageRequest');
+const CacheService = require('../components/cache/cacheService');
 
 /**
  * @param message
@@ -32,6 +33,7 @@ const saveMessage = (data) => {
         prepareMessageToSave(data.message),
     );
 
+    CacheService.clearCache();
     MessageStorageService.saveData(messageRequest);
 };
 
@@ -61,11 +63,19 @@ router.get(
     '/messages/my-list/:userId',
     (req, res) => {
         let userId = req.params.userId;
+        let cacheKey = 'created_' + userId;
+
+        let data = CacheService.readDataFromCache(cacheKey);
+
+        if (!data) {
+            data = MessageStorageService.getMessagesByUserId(userId);
+            CacheService.putDataToCache(cacheKey, data);
+        }
 
         return res.json(
             {
                 success: true,
-                data: MessageStorageService.getMessagesByUserId(userId)
+                data: data
             }
         );
     }
@@ -75,11 +85,19 @@ router.get(
     '/messages/target-list/:userId',
     (req, res) => {
         let userId = req.params.userId;
+        let cacheKey = 'target_' + userId;
+
+        let data = CacheService.readDataFromCache(cacheKey);
+
+        if (!data) {
+            data = MessageStorageService.getMessagesByUserId(userId, MessageListTypes.TARGET_TO_USER);
+            CacheService.putDataToCache(cacheKey, data);
+        }
 
         return res.json(
             {
                 success: true,
-                data: MessageStorageService.getMessagesByUserId(userId, MessageListTypes.TARGET_TO_USER)
+                data: data
             }
         );
     }
@@ -99,6 +117,7 @@ router.post(
                 return res.status(400).json({success: false, errors: errors.array()});
             }
 
+            CacheService.clearCache();
             MessageStorageService.markMessagesAsRead(userId, messages);
             return res.json({success: true});
         } catch (e) {

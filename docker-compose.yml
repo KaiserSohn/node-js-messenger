@@ -5,16 +5,18 @@ services:
     ports:
       - "80:80"
     build:
-      context: ./docker/nginx
+      dockerfile: ./docker/nginx/Dockerfile
     container_name: 'node_messenger_nginx'
     depends_on:
       - backend
-    restart: unless-stopped
+    restart: always
 
   backend:
+    #ports:
+    #  - "3000:80"
     build:
-      context: ./docker/node
+      dockerfile: ./docker/node/Dockerfile
     container_name: 'node_messenger_backend'
     volumes:
       - ./app:/app
-    restart: unless-stopped
+    restart: always

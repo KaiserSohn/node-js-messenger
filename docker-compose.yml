@@ -1,22 +1,22 @@
-version: '3.8'
+version: '3.3'
 
 services:
-  nginx:
+  backend:
+    build:
+      context: "./"
+      dockerfile: "./docker/node/Dockerfile"
+    container_name: 'node_messenger_backend'
+    #volumes:
+    #  - ./app:/app
+    restart: unless-stopped
+
+  frontend:
     ports:
       - "80:80"
     build:
-      dockerfile: ./docker/nginx/Dockerfile
+      context: "./docker/nginx"
+      dockerfile: "./Dockerfile"
     container_name: 'node_messenger_nginx'
     depends_on:
       - backend
-    restart: always
-
-  backend:
-    #ports:
-    #  - "3000:80"
-    build:
-      dockerfile: ./docker/node/Dockerfile
-    container_name: 'node_messenger_backend'
-    volumes:
-      - ./app:/app
-    restart: always
+    restart: unless-stopped
